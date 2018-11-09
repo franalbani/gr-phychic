@@ -31,7 +31,7 @@ except ImportError:
 	pass
 
 # import any pure python here
-from clipper import clipper
+from clipper import Clipper
 from clever_complex2ishort import clever_complex2ishort
 from clever_ishort2complex import clever_ishort2complex
 #
