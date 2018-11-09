@@ -33,7 +33,8 @@ GR_PYTHON_INSTALL(
     FILES
     __init__.py
     clipper.py
-    clever_complex2ishort.py DESTINATION ${GR_PYTHON_DIR}/phychic
+    clever_complex2ishort.py
+    clever_ishort2complex.py DESTINATION ${GR_PYTHON_DIR}/phychic
 )
 
 ########################################################################
