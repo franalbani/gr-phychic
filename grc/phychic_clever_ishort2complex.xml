@@ -15,12 +15,12 @@
 
   <sink>
     <name>in</name>
-    <type>complex</type>
+    <type>short</type>
   </sink>
 
   <source>
     <name>signal</name>
-    <type>short</type>
+    <type>complex</type>
   </source>
 
 </block>
