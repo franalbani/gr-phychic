@@ -32,7 +32,8 @@ endif()
 GR_PYTHON_INSTALL(
     FILES
     __init__.py
-    clipper.py DESTINATION ${GR_PYTHON_DIR}/phychic
+    clipper.py
+    clever_complex2ishort.py DESTINATION ${GR_PYTHON_DIR}/phychic
 )
 
 ########################################################################

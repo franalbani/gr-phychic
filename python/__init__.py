@@ -32,4 +32,5 @@ except ImportError:
 
 # import any pure python here
 from clipper import clipper
+from clever_complex2ishort import clever_complex2ishort
 #
