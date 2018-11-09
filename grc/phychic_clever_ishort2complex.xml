@@ -3,7 +3,7 @@
   <name>clever_ishort2complex</name>
   <key>phychic_clever_ishort2complex</key>
   <category>[phychic]</category>
-  <import>from phychic import clever_ishort2complex, C2IS_SCALE_FACTOR</import>
+  <import>from phychic.clever_ishort2complex import clever_ishort2complex, C2IS_SCALE_FACTOR</import>
   <make>clever_ishort2complex($scale_factor)</make>
 
   <param>

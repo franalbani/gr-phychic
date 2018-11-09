@@ -18,7 +18,7 @@
 # the Free Software Foundation, Inc., 51 Franklin Street,
 # Boston, MA 02110-1301, USA.
 
-from gnuradio import gr
+from gnuradio import gr, blocks
 from clever_complex2ishort import C2IS_SCALE_FACTOR
 
 
