@@ -17,19 +17,21 @@
 # along with this software; see the file COPYING.  If not, write to
 # the Free Software Foundation, Inc., 51 Franklin Street,
 # Boston, MA 02110-1301, USA.
-# 
 
 from gnuradio import gr
+from clever_complex2ishort import C2IS_SCALE_FACTOR
+
 
 class clever_ishort2complex(gr.hier_block2):
-    """
-    docstring for block clever_ishort2complex
-    """
-    def __init__(self, scale_factor):
-        gr.hier_block2.__init__(self,
-            "clever_ishort2complex",
-            gr.io_signature(<+MIN_IN+>, <+MAX_IN+>, gr.sizeof_<+ITYPE+>),  # Input signature
-            gr.io_signature(<+MIN_OUT+>, <+MAX_OUT+>, gr.sizeof_<+OTYPE+>)) # Output signature
 
-            # Define blocks and connect them
-            self.connect()
+    def __init__(self, scale_factor=1.0 / C2IS_SCALE_FACTOR):
+
+        gr.hier_block2.__init__(self, self.__class__.__name__,
+                                gr.io_signature(1, 1, gr.sizeof_short),
+                                gr.io_signature(1, 1, gr.sizeof_gr_complex))
+
+
+        self.is2c = blocks.interleaved_short_to_complex(vector_input=False, swap=False)
+        self.scaler = blocks.multiply_const_cc(scale_factor)
+
+        self.connect(self, self.is2c, self.scaler, self)
