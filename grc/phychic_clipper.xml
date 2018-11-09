@@ -1,38 +1,33 @@
 <?xml version="1.0"?>
 <block>
-  <name>clipper</name>
+  <name>Clipper</name>
   <key>phychic_clipper</key>
   <category>[phychic]</category>
   <import>import phychic</import>
-  <make>phychic.clipper($lower, $upper)</make>
-  <!-- Make one 'param' node for every Parameter you want settable from the GUI.
-       Sub-nodes:
-       * name
-       * key (makes the value accessible as $keyname, e.g. in the make node)
-       * type -->
+  <make>phychic.Clipper(lower=$lower, upper=$upper)</make>
+
   <param>
-    <name>...</name>
-    <key>...</key>
-    <type>...</type>
+    <name>Lower limit</name>
+    <key>lower</key>
+    <value>-1.0</value>
+    <type>float</type>
   </param>
 
-  <!-- Make one 'sink' node per input. Sub-nodes:
-       * name (an identifier for the GUI)
-       * type
-       * vlen
-       * optional (set to 1 for optional inputs) -->
+  <param>
+    <name>Upper limit</name>
+    <key>upper</key>
+    <value>1.0</value>
+    <type>float</type>
+  </param>
+
   <sink>
     <name>in</name>
-    <type><!-- e.g. int, float, complex, byte, short, xxx_vector, ...--></type>
+    <type>complex</type>
   </sink>
 
-  <!-- Make one 'source' node per output. Sub-nodes:
-       * name (an identifier for the GUI)
-       * type
-       * vlen
-       * optional (set to 1 for optional inputs) -->
   <source>
-    <name>out</name>
-    <type><!-- e.g. int, float, complex, byte, short, xxx_vector, ...--></type>
+    <name>signal</name>
+    <type>complex</type>
   </source>
+
 </block>
