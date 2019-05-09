@@ -4,7 +4,7 @@
   <key>phychic_snapshotlizer</key>
   <category>[phychic]</category>
   <import>import phychic</import>
-  <make>phychic.snapshotlizer($block_size, $one_in, item_size=$item_type.size)</make>
+  <make>phychic.Snapshotlizer($block_size, $one_in)</make>
 
   <param>
     <name>Block size</name>
@@ -20,21 +20,6 @@
     <type>int</type>
   </param>
 
-  <param>
-    <name>Item type</name>
-    <key>item_type</key>
-    <type>enum</type>
-    <option>
-        <name>Complex</name>
-        <key>complex</key>
-        <opt>size:gr.sizeof_gr_complex</opt>
-    </option>
-    <option>
-        <name>IShort</name>
-        <key>short</key>
-        <opt>size:gr.sizeof_short</opt>
-    </option>
-  </param>
   <!-- Make one 'sink' node per input. Sub-nodes:
        * name (an identifier for the GUI)
        * type
@@ -52,6 +37,6 @@
        * optional (set to 1 for optional inputs) -->
   <source>
     <name>out</name>
-    <type>$output_type</type>
+    <type>complex</type>
   </source>
 </block>
