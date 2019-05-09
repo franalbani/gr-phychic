@@ -34,7 +34,8 @@ GR_PYTHON_INSTALL(
     __init__.py
     clipper.py
     clever_complex2ishort.py
-    clever_ishort2complex.py DESTINATION ${GR_PYTHON_DIR}/phychic
+    clever_ishort2complex.py
+    snapshotlizer.py DESTINATION ${GR_PYTHON_DIR}/phychic
 )
 
 ########################################################################
@@ -44,3 +45,4 @@ include(GrTest)
 
 set(GR_TEST_TARGET_DEPS gnuradio-phychic)
 set(GR_TEST_PYTHON_DIRS ${CMAKE_BINARY_DIR}/swig)
+GR_ADD_TEST(qa_snapshotlizer ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_snapshotlizer.py)
