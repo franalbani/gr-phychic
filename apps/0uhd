@@ -1,0 +1,227 @@
+#!/usr/bin/env python2
+
+from __future__ import print_function
+
+import sys
+import time
+import argparse
+import zmq
+import pmt
+from collections import deque
+from threading import Thread
+
+try:
+    from termcolor import colored
+except ImportError:
+    colored = lambda text, color: text
+
+from gnuradio import gr, blocks, uhd, zeromq
+
+from phychic import MessageMap
+
+
+DEFAULT = {}
+DEFAULT['UHD_DEVICE'] = ''
+DEFAULT['UHD_RX_ANTENNA'] = 'RX2'
+DEFAULT['UHD_TX_ANTENNA'] = 'TX/RX'
+DEFAULT['UHD_RX_GAIN_dB'] = 45
+DEFAULT['UHD_TX_GAIN_dB'] = 6
+DEFAULT['UHD_RX_FREQ'] = 436.445e6 + 0.5e6
+DEFAULT['UHD_TX_FREQ'] = 437.445e6
+DEFAULT['UHD_RX_SAMPLE_RATE'] = 2e6
+DEFAULT['UHD_TX_SAMPLE_RATE'] = 1e6
+DEFAULT['ZMQ_OUT_ADDRESS'] = 'tcp://0.0.0.0:35088'
+DEFAULT['ZMQ_IN_ADDRESS'] = 'tcp://0.0.0.0:35086'
+DEFAULT['UHD_WIRE_FORMAT'] = 'sc16'
+DEFAULT['ZMQ_FORMAT'] = 'complex'
+
+
+def is_monotone(d):
+    '''
+    True if a sequence has all its elements equal.
+    '''
+    return all(map(lambda x: x == d[0], d))
+
+
+class ThrottledNoiseSource(gr.hier_block2):
+
+    def __init__(self, rate):
+        gr.hier_block2.__init__(self, 'ThrottledNoiseSource',
+                                gr.io_signature(0, 0, 0),
+                                gr.io_signature(1, 1, gr.sizeof_gr_complex))
+
+        from gnuradio import analog
+
+        src = analog.noise_source_c(analog.GR_GAUSSIAN, 0.3)
+        thr = blocks.throttle(gr.sizeof_gr_complex, rate)
+
+        self.connect(src, thr, self)
+
+
+class ZeroUHD(gr.top_block):
+    '''
+    ZMQ two-way router of UHD traffic.
+
+    __init__ kwargs should be the same as main parser args.
+    '''
+
+    def __init__(self, **kwargs):
+
+        gr.top_block.__init__(self, self.__class__.__name__)
+
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+        if self.rx_device != 'test_device':
+            src = uhd.usrp_source(self.rx_device, uhd.stream_args(cpu_format="fc32",
+                                                            otw_format=self.uhd_wire_format,
+                                                            channels=range(1),),)
+            src.set_samp_rate(self.rx_sample_rate)
+            tune_request = uhd.tune_request(self.rx_freq, self.rx_sample_rate)
+            src.set_center_freq(tune_request, 0)
+            src.set_gain(self.rx_gain_dB, 0)
+            src.set_antenna(self.rx_antenna, 0)
+        else:
+            src = ThrottledNoiseSource(self.rx_sample_rate)
+
+        if self.tx_device != 'test_device':
+            self.snk = uhd.usrp_sink(self.tx_device, uhd.stream_args(cpu_format="fc32",
+                                                                     otw_format=self.uhd_wire_format,
+                                                                     channels=range(1),),
+                                     "uhd_packet_len")
+            self.snk.set_samp_rate(self.tx_sample_rate)
+            self.snk.set_center_freq(self.tx_freq, 0)
+            self.snk.set_gain(self.tx_gain_dB, 0)
+            self.snk.set_antenna(self.tx_antenna, 0)
+        else:
+            self.snk = blocks.null_sink(gr.sizeof_gr_complex)
+
+        if self.zmq_format == 'complex':
+            zmq_item_size = gr.sizeof_gr_complex
+            adapter = None
+        elif self.zmq_format == 'ishort':
+            zmq_item_size = gr.sizeof_short
+            adapter = blocks.complex_to_interleaved_short(False)
+        else:
+            raise ValueError('Unknown zmq format: %s. Must be complex or ishort.' % self.zmq_format)
+
+        zmq_out = zeromq.pub_sink(zmq_item_size, 1, self.zmq_out_address)
+
+        self.frames_sent = 0
+        self.igniter = MessageMap('Igniter', lambda x: self.ignite_engines(x))
+
+        p2ts = blocks.pdu_to_tagged_stream(blocks.complex_t, 'packet_len')
+        p2ts.set_min_output_buffer(500000)
+
+        self.rate_probe = blocks.probe_rate(gr.sizeof_gr_complex, 250)
+        self.connect(src, self.rate_probe)
+
+        self.msg_connect(self.igniter, 'out', p2ts, 'pdus')
+        self.connect(p2ts, self.snk)
+
+        if adapter:
+            self.connect(src, adapter, zmq_out)
+        else:
+            self.connect(src, zmq_out)
+
+        self.running = False
+
+    def ignite_engines(self, gr_pmt_msg_in):
+
+        try:
+            car = pmt.to_python(pmt.car(gr_pmt_msg_in))
+
+            if isinstance(car, dict) == False:
+                raise RuntimeError('car is not a dict.')
+            if pmt.is_c32vector(pmt.cdr(gr_pmt_msg_in)) == False:
+                raise RuntimeError('cdr is not a proper complex array.')
+
+            self.frames_sent += 1
+            return gr_pmt_msg_in
+
+        except RuntimeError as re:
+            print('')
+            print(colored('Malformed PMT: %s' % re, 'red'))
+            return None
+
+    def frame_receiver(self):
+        self.skt = zmq.Context().socket(zmq.SUB)
+        self.skt.setsockopt(zmq.SUBSCRIBE, '')
+        self.skt.bind(self.zmq_in_address)
+
+        poller = zmq.Poller()
+        poller.register(self.skt, zmq.POLLIN)
+
+        self.running = True
+
+        while True and self.running:
+            if poller.poll(0.1):
+                zmq_msg = self.skt.recv()
+                try:
+                    gr_pmt_msg = pmt.deserialize_str(zmq_msg)
+                    self.igniter._post(pmt.intern('in'), gr_pmt_msg)
+                except RuntimeError as re:
+                    print('')
+                    print(colored(re, 'red'))
+
+        self.skt.close()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--rx_device', type=str, default=DEFAULT['UHD_DEVICE'],
+                        help='RX device. This will go into UHD "Device Address" parameter. Use "test_device" for testing.')
+    parser.add_argument('--tx_device', type=str, default=DEFAULT['UHD_DEVICE'],
+                        help='TX device. This will go into UHD "Device Address" parameter. Use "test_device" for testing.')
+    parser.add_argument('--rx_sample_rate', type=float, default=DEFAULT['UHD_RX_SAMPLE_RATE'], help='RX Sample rate [Hz]')
+    parser.add_argument('--tx_sample_rate', type=float, default=DEFAULT['UHD_TX_SAMPLE_RATE'], help='TX Sample rate [Hz]')
+    parser.add_argument('--rx_freq', type=float, default=DEFAULT['UHD_RX_FREQ'], help='RX Center Frequency [Hz]')
+    parser.add_argument('--tx_freq', type=float, default=DEFAULT['UHD_TX_FREQ'], help='TX Center Frequency [Hz]')
+    parser.add_argument('--rx_antenna', type=str, default=DEFAULT['UHD_RX_ANTENNA'], help='UHD RX Antenna')
+    parser.add_argument('--tx_antenna', type=str, default=DEFAULT['UHD_TX_ANTENNA'], help='UHD TX Antenna')
+    parser.add_argument('--rx_gain_dB', type=float, default=DEFAULT['UHD_RX_GAIN_dB'], help='RX Gain [dB]')
+    parser.add_argument('--tx_gain_dB', type=float, default=DEFAULT['UHD_TX_GAIN_dB'], help='TX Gain [dB]')
+    parser.add_argument('--uhd_wire_format', type=str, default=DEFAULT['UHD_WIRE_FORMAT'], help='UHD samples wire format')
+    parser.add_argument('--zmq_out_address', type=str, default=DEFAULT['ZMQ_OUT_ADDRESS'], help='ZMQ PUB out address')
+    parser.add_argument('--zmq_in_address', type=str, default=DEFAULT['ZMQ_IN_ADDRESS'], help='ZMQ SUB in address')
+    parser.add_argument('--zmq_format', type=str, default=DEFAULT['ZMQ_FORMAT'], help='ZMQ PUB format. Applies only to RX.')
+
+    args = parser.parse_args()
+
+    zero_uhd = ZeroUHD(**vars(args))
+
+    print('')
+    print(vars(args))
+    print('')
+
+    expected_load_from_uhd = args.rx_sample_rate * (16 if args.uhd_wire_format == 'sc16' else 8) * 2 / 1e6
+    expected_load_to_zmq = args.rx_sample_rate * (32 if args.zmq_format == 'complex' else 16) * 2 / 1e6
+    print('RX Expected load:\n\tFrom UHD:\t%0.0f Mbps\n\t  To ZMQ:\t%0.0f Mbps' % (expected_load_from_uhd, expected_load_to_zmq))
+    print('')
+
+    look_last_n = 50
+    last_rates = deque(range(look_last_n), look_last_n)
+    start_time = time.time()
+    zero_uhd.start()
+
+    frt = Thread(target=zero_uhd.frame_receiver)
+    frt.start()
+
+    try:
+        while True:
+            time.sleep(0.25)
+            actual_rate = zero_uhd.rate_probe.rate()
+            snk_nitems_read = zero_uhd.snk.nitems_read(0)
+            last_rates.append(actual_rate)
+            ar_100 = 100.0 * actual_rate / args.rx_sample_rate
+            status = colored('Rate frozen during last %d checks.' % look_last_n, 'red') if is_monotone(last_rates) else colored('Not frozen', 'green')
+            print('\rUptime: %6ds | UHD RX rate: %0.0f sps (%3.0f%% of %0.0f) %s | Frames sent: %7d (%9d items)' % (time.time() - start_time, actual_rate, ar_100, args.rx_sample_rate, status, zero_uhd.frames_sent, snk_nitems_read),
+                  end='')
+            sys.stdout.flush()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        zero_uhd.running = False
+        frt.join()
+        zero_uhd.stop()
+        print('')
