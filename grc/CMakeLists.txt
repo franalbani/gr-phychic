@@ -22,5 +22,6 @@ install(FILES
     phychic_clipper.xml
     phychic_clever_complex2ishort.xml
     phychic_clever_ishort2complex.xml
-    phychic_snapshotlizer.xml DESTINATION share/gnuradio/grc/blocks
+    phychic_snapshotlizer.xml
+    phychic_message_map.xml DESTINATION share/gnuradio/grc/blocks
 )
