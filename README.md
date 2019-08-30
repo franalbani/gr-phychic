@@ -13,6 +13,7 @@ Phychic: physical layer esoteric sensing tool
 
 * In the remote host:
     * modified our system to output a copy of raw iq through a IPC ZMQ socket.
+      `0uhd` is included as an example if you want to use an USRP remotely.
     * run [inner_eye](apps/inner_eye) to:
         * read the socket
         * clever downsampling
