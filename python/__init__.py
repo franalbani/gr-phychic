@@ -35,4 +35,4 @@ from clipper import Clipper
 from clever_complex2ishort import clever_complex2ishort
 from clever_ishort2complex import clever_ishort2complex
 from snapshotlizer import Snapshotlizer
-from message_map import message_map
+from message_map import MessageMap

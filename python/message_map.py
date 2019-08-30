@@ -19,24 +19,32 @@
 # Boston, MA 02110-1301, USA.
 # 
 
-import numpy
+import pmt
 from gnuradio import gr
 
-class message_map(gr.sync_block):
+
+class MessageMap(gr.basic_block):
     """
-    docstring for block message_map
+    Applies a function to a message.
+
+    For each message received, sends another with 'function(msg)' inside.
+
+    The function must accept and return a pmt.
+
+    If the function return None or pmt.PMT_NIL, nothing is sent.
     """
     def __init__(self, function):
-        gr.sync_block.__init__(self,
-            name="message_map",
-            in_sig=[<+numpy.float32+>],
-            out_sig=[<+numpy.float32+>])
+        gr.basic_block.__init__(self,
+                                self.__class__.__name__,
+                                in_sig=None,
+                                out_sig=None)
+        self.function = function
+        self.message_port_register_in(pmt.intern('in'))
+        self.message_port_register_out(pmt.intern('out'))
+        self.set_msg_handler(pmt.intern('in'), self.process_incoming)
 
+    def process_incoming(self, msg):
 
-    def work(self, input_items, output_items):
-        in0 = input_items[0]
-        out = output_items[0]
-        # <+signal processing here+>
-        out[:] = in0
-        return len(output_items[0])
-
+        out = self.function(msg)
+        if out not in [pmt.PMT_NIL, None]:
+            self.message_port_pub(pmt.intern('out'), out)

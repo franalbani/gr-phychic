@@ -19,23 +19,66 @@
 # Boston, MA 02110-1301, USA.
 # 
 
+
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
-from message_map import message_map
+from message_map import MessageMap
+import time
+import pmt
 
-class qa_message_map (gr_unittest.TestCase):
+class QAMessageMap (gr_unittest.TestCase):
 
     def setUp (self):
-        self.tb = gr.top_block ()
+        self.tb = gr.top_block()
 
     def tearDown (self):
         self.tb = None
 
-    def test_001_t (self):
-        # set up fg
-        self.tb.run ()
-        # check data
+    def test_identity(self):
+
+        id_msg_map = MessageMap('Id', lambda x: x)
+        msg_debug = blocks.message_debug()
+
+        self.tb.msg_connect(id_msg_map, 'out', msg_debug, 'store')
+
+        self.tb.start()
+        time.sleep(.2)
+
+        data = {'a': 1, 'b': 'x', 'c': [1, 2, 3]}
+        port = pmt.intern("in")
+        id_msg_map.to_basic_block()._post(port, pmt.to_pmt(data))
+
+        time.sleep(.2)
+        self.tb.stop()
+        self.tb.wait()
+        msg = msg_debug.get_message(0)
+
+        obtained = pmt.to_python(msg)
+
+        self.assertEqual(data, obtained)
+
+    def test_nil(self):
+
+        nil_msg_map = MessageMap('Id', lambda x: pmt.PMT_NIL)
+        msg_debug = blocks.message_debug()
+
+        self.tb.msg_connect(nil_msg_map, 'out', msg_debug, 'store')
+
+        self.tb.start()
+        time.sleep(.2)
+
+        data = {'a': 1, 'b': 'x', 'c': [1, 2, 3]}
+        port = pmt.intern("in")
+        nil_msg_map.to_basic_block()._post(port, pmt.to_pmt(data))
+
+        time.sleep(.2)
+        self.tb.stop()
+        self.tb.wait()
+
+        n_msgs = msg_debug.num_messages()
+
+        self.assertEqual(0, n_msgs)
 
 
 if __name__ == '__main__':
-    gr_unittest.run(qa_message_map, "qa_message_map.xml")
+    gr_unittest.run(QAMessageMap, "qa_MessageMap.xml")
