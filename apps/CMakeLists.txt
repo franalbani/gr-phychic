@@ -23,5 +23,6 @@ include(GrPython)
 GR_PYTHON_INSTALL(
     PROGRAMS
     inner_eye
+    0uhd
     DESTINATION bin
 )
