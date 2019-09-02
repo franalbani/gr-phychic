@@ -105,7 +105,7 @@ class ZeroUHD(gr.top_block):
         else:
             raise ValueError('Unknown zmq format: %s. Must be complex or ishort.' % self.zmq_format)
 
-        zmq_out = zeromq.pub_sink(zmq_item_size, 1, self.zmq_out_address)
+        zmq_out = zeromq.pub_sink(zmq_item_size, 1, self.zmq_out_address, 100, True, -1)
 
         self.frames_sent = 0
         self.igniter = MessageMap('Igniter', lambda x: self.ignite_engines(x))
