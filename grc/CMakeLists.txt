@@ -19,9 +19,9 @@
 # Boston, MA 02110-1301, USA.
 
 install(FILES
-    phychic_clipper.xml
-    phychic_clever_complex2ishort.xml
-    phychic_clever_ishort2complex.xml
-    phychic_snapshotlizer.xml
-    phychic_message_map.xml DESTINATION share/gnuradio/grc/blocks
+    phychic_clipper.block.yml
+    phychic_clever_complex2ishort.block.yml
+    phychic_clever_ishort2complex.block.yml
+    phychic_snapshotlizer.block.yml
+    phychic_message_map.block.yml DESTINATION share/gnuradio/grc/blocks
 )
