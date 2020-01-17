@@ -75,10 +75,10 @@ if __name__ == '__main__':
     item_size = 8 # bytes
     network_load = item_size * sample_rate / one_in
 
-    print '\n'
+    print('\n')
     #print 'For sample_rate = %0.2f MHz, symbol_rate = %0.0f kbps and resolution = %0.0f kHz:' % (sample_rate/1e6, symbol_rate/1e3, desired_res_bw/1e3)
-    print 'For sample_rate = %0.2f MHz, symbol_rate = %0.0f kbps and symbol_span = %d:' % (sample_rate/1e6, symbol_rate/1e3, desired_symbol_span)
-    print 'Block size should be %d and only 1 block in %d should be kept.' % (fft_size, one_in)
-    print 'Resulting resulution bandwidth: %0.1f kHz' % (resulting_res_bw / 1e3)
-    print 'Resulting network load: %0.1f kBytes' % (network_load / 1024.0)
-    print '\n'
+    print('For sample_rate = %0.2f MHz, symbol_rate = %0.0f kbps and symbol_span = %d:' % (sample_rate/1e6, symbol_rate/1e3, desired_symbol_span))
+    print('Block size should be %d and only 1 block in %d should be kept.' % (fft_size, one_in))
+    print('Resulting resulution bandwidth: %0.1f kHz' % (resulting_res_bw / 1e3))
+    print('Resulting network load: %0.1f kBytes' % (network_load / 1024.0))
+    print('\n')
