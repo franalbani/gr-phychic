@@ -1,7 +1,5 @@
 #!/usr/bin/env python2
 
-from __future__ import print_function
-
 import sys
 import time
 import argparse
@@ -108,7 +106,7 @@ class ZeroUHD(gr.top_block):
         zmq_out = zeromq.pub_sink(zmq_item_size, 1, self.zmq_out_address, 100, True, -1)
 
         self.frames_sent = 0
-        self.igniter = MessageMap('Igniter', lambda x: self.ignite_engines(x))
+        self.igniter = MessageMap(lambda x: self.ignite_engines(x))
 
         p2ts = blocks.pdu_to_tagged_stream(blocks.complex_t, 'packet_len')
         p2ts.set_min_output_buffer(500000)
