@@ -36,7 +36,7 @@ class QAMessageMap (gr_unittest.TestCase):
 
     def test_identity(self):
 
-        id_msg_map = MessageMap('Id', lambda x: x)
+        id_msg_map = MessageMap(lambda x: x)
         msg_debug = blocks.message_debug()
 
         self.tb.msg_connect(id_msg_map, 'out', msg_debug, 'store')
@@ -59,7 +59,7 @@ class QAMessageMap (gr_unittest.TestCase):
 
     def test_nil(self):
 
-        nil_msg_map = MessageMap('Id', lambda x: pmt.PMT_NIL)
+        nil_msg_map = MessageMap(lambda x: pmt.PMT_NIL)
         msg_debug = blocks.message_debug()
 
         self.tb.msg_connect(nil_msg_map, 'out', msg_debug, 'store')

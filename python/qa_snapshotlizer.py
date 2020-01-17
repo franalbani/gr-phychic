@@ -21,7 +21,7 @@
 
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
-from snapshotlizer import snapshotlizer
+from snapshotlizer import Snapshotlizer
 
 class qa_snapshotlizer (gr_unittest.TestCase):
 
