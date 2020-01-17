@@ -22,15 +22,15 @@
 # Check if there is C++ code at all
 ########################################################################
 if(NOT phychic_sources)
-	MESSAGE(STATUS "No C++ sources... skipping swig/")
-	return()
+    MESSAGE(STATUS "No C++ sources... skipping swig/")
+    return()
 endif(NOT phychic_sources)
 
 ########################################################################
 # Include swig generation macros
 ########################################################################
 find_package(SWIG)
-find_package(PythonLibs 2)
+find_package(PythonLibs)
 if(NOT SWIG_FOUND OR NOT PYTHONLIBS_FOUND)
     return()
 endif()
@@ -40,12 +40,12 @@ include(GrPython)
 ########################################################################
 # Setup swig generation
 ########################################################################
-foreach(incdir ${GNURADIO_RUNTIME_INCLUDE_DIRS})
-    list(APPEND GR_SWIG_INCLUDE_DIRS ${incdir}/gnuradio/swig)
-endforeach(incdir)
+set(GR_SWIG_INCLUDE_DIRS $<TARGET_PROPERTY:gnuradio::runtime_swig,INTERFACE_INCLUDE_DIRECTORIES>)
+set(GR_SWIG_TARGET_DEPS gnuradio::runtime_swig)
 
 set(GR_SWIG_LIBRARIES gnuradio-phychic)
-set(GR_SWIG_DOC_FILE ${CMAKE_CURRENT_BINARY_DIR}/phychic_swig_doc.i)
+
+set(GR_SWIG_DOC_FILE ${CMAKE_CURRENT_BINARY_DIR}/phychic2_swig_doc.i)
 set(GR_SWIG_DOC_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/../include)
 
 GR_SWIG_MAKE(phychic_swig phychic_swig.i)
