@@ -26,13 +26,13 @@ description here (python/__init__.py).
 # import swig generated symbols into the phychic namespace
 try:
 	# this might fail if the module is python-only
-	from phychic_swig import *
+	from .phychic_swig import *
 except ImportError:
 	pass
 
 # import any pure python here
-from clipper import Clipper
-from clever_complex2ishort import clever_complex2ishort
-from clever_ishort2complex import clever_ishort2complex
-from snapshotlizer import Snapshotlizer
-from message_map import MessageMap
+from .clipper import Clipper
+from .clever_complex2ishort import clever_complex2ishort
+from .clever_ishort2complex import clever_ishort2complex
+from .snapshotlizer import Snapshotlizer
+from .message_map import MessageMap
