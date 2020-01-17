@@ -19,7 +19,7 @@
 # Boston, MA 02110-1301, USA.
 
 from gnuradio import gr, blocks
-from clever_complex2ishort import C2IS_SCALE_FACTOR
+from .clever_complex2ishort import C2IS_SCALE_FACTOR
 
 
 class clever_ishort2complex(gr.hier_block2):

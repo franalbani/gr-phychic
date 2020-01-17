@@ -19,7 +19,7 @@
 # Boston, MA 02110-1301, USA.
 
 from gnuradio import gr, blocks
-from clipper import Clipper
+from .clipper import Clipper
 
 
 C2IS_SCALE_FACTOR = float(2 ** (gr.sizeof_short * 8 - 1) - 1)
