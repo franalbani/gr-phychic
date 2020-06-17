@@ -1,0 +1,148 @@
+options:
+  parameters:
+    author: Fran Albani
+    category: '[GRC Hier Blocks]'
+    cmake_opt: ''
+    comment: ''
+    copyright: ''
+    description: ''
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: no_gui
+    hier_block_src_path: '.:'
+    id: inner_eye_relay
+    max_nouts: '0'
+    output_language: python
+    placement: (0,0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: Inner Eye Relay
+    window_size: ''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 8]
+    rotation: 0
+    state: enabled
+
+blocks:
+- name: blocks_message_debug_0
+  id: blocks_message_debug
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [576, 360.0]
+    rotation: 0
+    state: enabled
+- name: blocks_probe_rate_0
+  id: blocks_probe_rate
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha: '0.15'
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    mintime: '3000'
+    type: short
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [320, 348.0]
+    rotation: 0
+    state: enabled
+- name: input_address
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: Input address
+    short_id: i
+    type: str
+    value: tcp://localhost:34000
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 140.0]
+    rotation: 0
+    state: true
+- name: output_address
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: Output address
+    short_id: o
+    type: str
+    value: tcp://0.0.0.0:35000
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [320, 140.0]
+    rotation: 0
+    state: true
+- name: zeromq_pub_sink_0
+  id: zeromq_pub_sink
+  parameters:
+    address: output_address
+    affinity: ''
+    alias: ''
+    comment: ''
+    hwm: '-1'
+    pass_tags: 'True'
+    timeout: '100'
+    type: short
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [320, 260.0]
+    rotation: 0
+    state: true
+- name: zeromq_sub_source_0
+  id: zeromq_sub_source
+  parameters:
+    address: input_address
+    affinity: ''
+    alias: ''
+    comment: ''
+    hwm: '-1'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    pass_tags: 'True'
+    timeout: '100'
+    type: short
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 260.0]
+    rotation: 0
+    state: enabled
+
+connections:
+- [blocks_probe_rate_0, rate, blocks_message_debug_0, print]
+- [zeromq_sub_source_0, '0', blocks_probe_rate_0, '0']
+- [zeromq_sub_source_0, '0', zeromq_pub_sink_0, '0']
+
+metadata:
+  file_format: 1
