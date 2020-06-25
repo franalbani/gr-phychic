@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 # Build Helper for Arch Linux (in /usr not in /usr/local)
 
 mkdir -p build
