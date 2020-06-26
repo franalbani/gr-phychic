@@ -1,0 +1,47 @@
+id: modular_seer
+label: Modular Seer
+category: '[phychic]'
+
+parameters:
+-   id: block_size
+    label: Block size
+    dtype: int
+    default: '40'
+    hide: none
+
+-   id: input_address
+    label: Input Address
+    dtype: string
+    default: tcp://localhost
+    hide: none
+
+-   id: input_port
+    label: Input port
+    dtype: int
+    default: '35000'
+    hide: none
+
+-   id: one_in
+    label: One in
+    dtype: int
+    default: '24'
+    hide: none
+
+-   id: origin
+    label: Origin
+    dtype: string
+    default: some_gs
+    hide: none
+
+inputs: []
+
+outputs:
+-   label: out
+    dtype: complex
+    vlen: 1
+
+templates:
+    imports: 'from phychic import ModularSeer'
+    make: "ModularSeer(block_size=${ block_size }, input_address=${ input_address }, input_port=${ input_port }, one_in=${ one_in }, origin=${ origin })"
+
+file_format: 1

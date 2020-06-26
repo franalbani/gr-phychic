@@ -19,6 +19,7 @@
 # Boston, MA 02110-1301, USA.
 
 install(FILES
+    phychic_modular_seer.block.yml
     phychic_clipper.block.yml
     phychic_clever_complex2ishort.block.yml
     phychic_clever_ishort2complex.block.yml

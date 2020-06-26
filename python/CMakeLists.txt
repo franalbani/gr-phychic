@@ -36,6 +36,7 @@ GR_PYTHON_INSTALL(
     clever_complex2ishort.py
     clever_ishort2complex.py
     snapshotlizer.py
+    modular_seer.py
     message_map.py DESTINATION ${GR_PYTHON_DIR}/phychic
 )
 

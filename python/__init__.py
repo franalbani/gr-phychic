@@ -32,7 +32,8 @@ except ImportError:
 
 # import any pure python here
 from .clipper import Clipper
-from .clever_complex2ishort import clever_complex2ishort
+from .clever_complex2ishort import clever_complex2ishort, C2IS_SCALE_FACTOR
 from .clever_ishort2complex import clever_ishort2complex
 from .snapshotlizer import Snapshotlizer
 from .message_map import MessageMap
+from .modular_seer import ModularSeer
