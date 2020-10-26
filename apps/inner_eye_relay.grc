@@ -5,7 +5,7 @@ options:
     cmake_opt: ''
     comment: ''
     copyright: ''
-    description: ''
+    description: This is used to generate inner_eye_relay app
     gen_cmake: 'On'
     gen_linking: dynamic
     generate_options: no_gui
@@ -18,7 +18,7 @@ options:
     realtime_scheduling: ''
     run: 'True'
     run_command: '{python} -u {filename}'
-    run_options: prompt
+    run_options: run
     sizing_mode: fixed
     thread_safe_setters: ''
     title: Inner Eye Relay

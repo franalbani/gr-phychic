@@ -7,6 +7,7 @@
 # GNU Radio Python Flow Graph
 # Title: Inner Eye Relay
 # Author: Fran Albani
+# Description: This is used to generate inner_eye_relay app
 # GNU Radio version: 3.8.1.0
 
 from gnuradio import blocks
@@ -65,7 +66,8 @@ class inner_eye_relay(gr.top_block):
 
 
 def argument_parser():
-    parser = ArgumentParser()
+    description = 'This is used to generate inner_eye_relay app'
+    parser = ArgumentParser(description=description)
     parser.add_argument(
         "-i", "--input-address", dest="input_address", type=str, default='tcp://localhost:34000',
         help="Set Input address [default=%(default)r]")
@@ -91,11 +93,6 @@ def main(top_block_cls=inner_eye_relay, options=None):
 
     tb.start()
 
-    try:
-        input('Press Enter to quit: ')
-    except EOFError:
-        pass
-    tb.stop()
     tb.wait()
 
 
