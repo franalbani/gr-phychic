@@ -32,6 +32,24 @@ options:
     state: enabled
 
 blocks:
+- name: blocks_file_sink_0
+  id: blocks_file_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    append: 'False'
+    comment: ''
+    file: iq_path
+    type: short
+    unbuffered: 'False'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [328, 444.0]
+    rotation: 0
+    state: true
 - name: blocks_message_debug_0
   id: blocks_message_debug
   parameters:
@@ -42,7 +60,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [576, 360.0]
+    coordinate: [560, 152.0]
     rotation: 0
     state: enabled
 - name: blocks_probe_rate_0
@@ -61,9 +79,22 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [320, 348.0]
+    coordinate: [320, 140.0]
     rotation: 0
     state: enabled
+- name: import_0
+  id: import
+  parameters:
+    alias: ''
+    comment: ''
+    imports: from datetime import datetime
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [216, 12.0]
+    rotation: 0
+    state: true
 - name: input_address
   id: parameter
   parameters:
@@ -78,7 +109,24 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [8, 140.0]
+    coordinate: [8, 164.0]
+    rotation: 0
+    state: true
+- name: iq_path
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: ''
+    short_id: ''
+    type: str
+    value: datetime.now().strftime('%Y.%m.%d_%H.%M.%S_inner_eye_relay.int16')
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [512, 436.0]
     rotation: 0
     state: true
 - name: output_address
@@ -95,7 +143,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [320, 140.0]
+    coordinate: [520, 284.0]
     rotation: 0
     state: true
 - name: zeromq_pub_sink_0
@@ -114,7 +162,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [320, 260.0]
+    coordinate: [320, 284.0]
     rotation: 0
     state: true
 - name: zeromq_sub_source_0
@@ -135,12 +183,13 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [8, 260.0]
+    coordinate: [8, 284.0]
     rotation: 0
     state: enabled
 
 connections:
 - [blocks_probe_rate_0, rate, blocks_message_debug_0, print]
+- [zeromq_sub_source_0, '0', blocks_file_sink_0, '0']
 - [zeromq_sub_source_0, '0', blocks_probe_rate_0, '0']
 - [zeromq_sub_source_0, '0', zeromq_pub_sink_0, '0']
 

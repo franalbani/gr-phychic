@@ -10,6 +10,7 @@
 # Description: This is used to generate inner_eye_relay app
 # GNU Radio version: 3.8.1.0
 
+from datetime import datetime
 from gnuradio import blocks
 from gnuradio import gr
 from gnuradio.filter import firdes
@@ -23,13 +24,14 @@ from gnuradio import zeromq
 
 class inner_eye_relay(gr.top_block):
 
-    def __init__(self, input_address='tcp://localhost:34000', output_address='tcp://0.0.0.0:35000'):
+    def __init__(self, input_address='tcp://localhost:34000', iq_path=datetime.now().strftime('%Y.%m.%d_%H.%M.%S_inner_eye_relay.int16'), output_address='tcp://0.0.0.0:35000'):
         gr.top_block.__init__(self, "Inner Eye Relay")
 
         ##################################################
         # Parameters
         ##################################################
         self.input_address = input_address
+        self.iq_path = iq_path
         self.output_address = output_address
 
         ##################################################
@@ -39,6 +41,8 @@ class inner_eye_relay(gr.top_block):
         self.zeromq_pub_sink_0 = zeromq.pub_sink(gr.sizeof_short, 1, output_address, 100, True, -1)
         self.blocks_probe_rate_0 = blocks.probe_rate(gr.sizeof_short*1, 3000, 0.15)
         self.blocks_message_debug_0 = blocks.message_debug()
+        self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_short*1, iq_path, False)
+        self.blocks_file_sink_0.set_unbuffered(False)
 
 
 
@@ -46,6 +50,7 @@ class inner_eye_relay(gr.top_block):
         # Connections
         ##################################################
         self.msg_connect((self.blocks_probe_rate_0, 'rate'), (self.blocks_message_debug_0, 'print'))
+        self.connect((self.zeromq_sub_source_0, 0), (self.blocks_file_sink_0, 0))
         self.connect((self.zeromq_sub_source_0, 0), (self.blocks_probe_rate_0, 0))
         self.connect((self.zeromq_sub_source_0, 0), (self.zeromq_pub_sink_0, 0))
 
@@ -55,6 +60,13 @@ class inner_eye_relay(gr.top_block):
 
     def set_input_address(self, input_address):
         self.input_address = input_address
+
+    def get_iq_path(self):
+        return self.iq_path
+
+    def set_iq_path(self, iq_path):
+        self.iq_path = iq_path
+        self.blocks_file_sink_0.open(self.iq_path)
 
     def get_output_address(self):
         return self.output_address
@@ -72,6 +84,9 @@ def argument_parser():
         "-i", "--input-address", dest="input_address", type=str, default='tcp://localhost:34000',
         help="Set Input address [default=%(default)r]")
     parser.add_argument(
+        "--iq-path", dest="iq_path", type=str, default=datetime.now().strftime('%Y.%m.%d_%H.%M.%S_inner_eye_relay.int16'),
+        help="Set iq_path [default=%(default)r]")
+    parser.add_argument(
         "-o", "--output-address", dest="output_address", type=str, default='tcp://0.0.0.0:35000',
         help="Set Output address [default=%(default)r]")
     return parser
@@ -80,7 +95,7 @@ def argument_parser():
 def main(top_block_cls=inner_eye_relay, options=None):
     if options is None:
         options = argument_parser().parse_args()
-    tb = top_block_cls(input_address=options.input_address, output_address=options.output_address)
+    tb = top_block_cls(input_address=options.input_address, iq_path=options.iq_path, output_address=options.output_address)
 
     def sig_handler(sig=None, frame=None):
         tb.stop()
